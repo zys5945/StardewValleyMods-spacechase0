@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
@@ -99,6 +100,8 @@ namespace SpaceCore
 
             public virtual void DoLevelPerk(int level) { }
 
+            public virtual bool ShouldShowOnSkillsPage => true;
+
             protected Skill(string id)
             {
                 this.Id = id;
@@ -149,9 +152,11 @@ namespace SpaceCore
                 writer.Write(this.SkillLevelIncreases.Count);
                 foreach (var skill in this.SkillLevelIncreases)
                 {
+                    ValidateSkill(Game1.player, skill.Key);
                     writer.Write(skill.Key);
                     writer.Write(skill.Value);
                     Skills.Buffs[Game1.player.UniqueMultiplayerID][skill.Key][this.id] = skill.Value;
+                    Log.Info($"Adding buff for skill {skill.Key} from source {this.id} at level {skill.Value}");
                 }
 
                 Networking.BroadcastMessage(Skills.MsgExperience, stream.ToArray());
@@ -167,9 +172,11 @@ namespace SpaceCore
                 writer.Write(this.SkillLevelIncreases.Count);
                 foreach (var skill in this.SkillLevelIncreases)
                 {
+                    ValidateSkill(Game1.player, skill.Key);
                     writer.Write(skill.Key);
                     writer.Write(0);
                     Skills.Buffs[Game1.player.UniqueMultiplayerID][skill.Key].Remove(this.id);
+                    Log.Info($"Removing buff for skill {skill.Key} from source {this.id} at level {skill.Value}");
                 }
 
                 Networking.BroadcastMessage(Skills.MsgExperience, stream.ToArray());
@@ -213,6 +220,11 @@ namespace SpaceCore
         public static void RegisterSkill(Skill skill)
         {
             Skills.SkillsByName.Add(skill.Id, skill);
+
+            GameStateQuery.Register("PLAYER_" + skill.Id.ToUpper() + "_LEVEL", (args, ctx) =>
+            {
+                return GameStateQuery.Helpers.PlayerSkillLevelImpl(args, ctx.Player, (f) => f.GetCustomSkillLevel(skill));
+            });
         }
 
         public static Skill GetSkill(string name)
@@ -233,6 +245,22 @@ namespace SpaceCore
         public static string[] GetSkillList()
         {
             return Skills.SkillsByName.Keys.ToArray();
+        }
+
+        public static List<Tuple<string, int, int>> GetExperienceAndLevels(Farmer farmer)
+        {
+            List<Tuple<string, int, int>> forFarmer = new();
+            if (!Skills.Exp.ContainsKey(farmer.UniqueMultiplayerID))
+                return forFarmer;
+
+            forFarmer.AddRange(
+                from skillName in Skills.Exp[farmer.UniqueMultiplayerID].Keys
+                let xp = Skills.GetExperienceFor(farmer, skillName)
+                let level = Skills.GetSkillLevel(farmer, skillName)
+                select new Tuple<string, int, int>(skillName, xp, level)
+                );
+
+            return forFarmer;
         }
 
         public static int GetExperienceFor(Farmer farmer, string skillName)
@@ -273,7 +301,7 @@ namespace SpaceCore
 
             if (buffName is not null)
             {
-                if(!Skills.Buffs[farmer.UniqueMultiplayerID][skillName].TryGetValue(buffName, out int level))
+                if (!Skills.Buffs[farmer.UniqueMultiplayerID][skillName].TryGetValue(buffName, out int level))
                 {
                     level = 0;
                 }
@@ -349,6 +377,7 @@ namespace SpaceCore
                     writer.Write(skill.Value);
                 }
             }
+
             writer.Write(Skills.Buffs.Count);
             foreach (var data in Skills.Buffs)
             {
@@ -507,7 +536,7 @@ namespace SpaceCore
             {
                 if (SpaceCore.Instance.Config.CustomSkillPage && ( Skills.SkillsByName.Count > 0 || SpaceEvents.HasAddWalletItemEventHandlers() ) )
                 {
-                    gm.pages[GameMenu.skillsTab] = new NewSkillsPage(gm.xPositionOnScreen, gm.yPositionOnScreen, gm.width + (LocalizedContentManager.CurrentLanguageCode == LocalizedContentManager.LanguageCode.ru ? 64 : 0), gm.height);
+                    //gm.pages[GameMenu.skillsTab] = new NewSkillsPage(gm.xPositionOnScreen, gm.yPositionOnScreen, gm.width + (LocalizedContentManager.CurrentLanguageCode == LocalizedContentManager.LanguageCode.ru ? 64 : 0), gm.height);
                 }
             }
         }
@@ -674,6 +703,11 @@ namespace SpaceCore
         public static int GetCustomSkillLevel(this Farmer farmer, string skill)
         {
             return Skills.GetSkillLevel(farmer, skill);
+        }
+
+        public static List<Tuple<string, int, int>> GetCustomSkillExperienceAndLevels(this Farmer farmer)
+        {
+            return Skills.GetExperienceAndLevels(farmer);
         }
 
         public static int GetCustomBuffedSkillLevel(this Farmer farmer, Skills.Skill skill)
