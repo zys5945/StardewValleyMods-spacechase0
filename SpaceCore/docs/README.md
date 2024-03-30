@@ -28,6 +28,7 @@ Provided functionality for content pack authors:
 * New trigger action actions
     * `spacechase0.SpaceCore_PlaySound sound local` - `sound` = the cue ID, `local` = `true` if everyone near the player should hear it, `false` otherwise
     * `spacechase0.SpaceCore_ShowHudMessage "message goes here"`
+    * `spacechase0.SpaceCore_PlayEvent eventid ifNotSeen` - `ifNotSeen` is optional (defaults to false) - if true, the event won't play if it has been seen before
 * Custom event commands
     * `damageFarmer amount`
     * `setDating npc [true/false]` - default true
@@ -55,7 +56,7 @@ Provided functionality for content pack authors:
             * `Color` - Color, the color the screen should flash - ex. `{ "R": 0, "G": 0, "B": 255, "A": 255 }`
         * `UseForTriggerAction` - True to run a trigger action upon use, false otherwise. Default false.
         * `GiftableToNpcDisallowList` - A dictionary of NPC names to messages that should show when you try to gift the item to them, instead of them receiving the gift.
-        * `GiftableToNpcAllowList` - A dictionary of NPC names to `true` for if you want that NPC allowed. If set, any NPCs not listed here will not be able to receive the gift, and instead will show the message from the folowing field.
+        * `GiftableToNpcAllowList` - A dictionary of NPC names to `true` for if you want that NPC allowed. If set, any NPCs not listed here will not be able to receive the gift, and instead will show the message from the following field.
         * `GiftedToNotOnAllowListMessage` - The message to show for when the item is gifted to someone not on the allow list. Required if `GiftableToNpcAllowList` is set. (The disallow list is checked first, so you can still allow specific responses by certain NPCs.)
     * Crops - These are in `spacechase0.SpaceCore/CropExtensionData`
         * `YieldOverrides` - A little complex, but you can override each crop phase's harvestability with experience gained, the new phase it goes to, and the drops it has (including conditional drops). Example [here](https://gist.github.com/spacechase0/79f95bcd46160da9e52f5bc0c71329f4).

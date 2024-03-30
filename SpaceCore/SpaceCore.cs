@@ -153,7 +153,25 @@ namespace SpaceCore
                 }
 
                 error = null;
-                Game1.addHUDMessage(new HUDMessage(args[0]));
+                Game1.addHUDMessage(new HUDMessage(args[1]));
+                return true;
+            });
+
+            TriggerActionManager.RegisterAction("spacechase0.SpaceCore_PlayEvent", (string[] args, TriggerActionContext ctx, out string error) =>
+            {
+                if (args.Length < 2)
+                {
+                    error = "Not enough arguments";
+                    return false;
+                }
+                bool checkseen = false;
+                if (args.Length >= 3)
+                {
+                    checkseen = args[2] == "true";
+                }
+
+                error = null;
+                Game1.PlayEvent(args[1], false, checkseen);
                 return true;
             });
 
