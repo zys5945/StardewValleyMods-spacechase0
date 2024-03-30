@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
@@ -536,7 +535,7 @@ namespace SpaceCore
             {
                 if (SpaceCore.Instance.Config.CustomSkillPage && ( Skills.SkillsByName.Count > 0 || SpaceEvents.HasAddWalletItemEventHandlers() ) )
                 {
-                    //gm.pages[GameMenu.skillsTab] = new NewSkillsPage(gm.xPositionOnScreen, gm.yPositionOnScreen, gm.width + (LocalizedContentManager.CurrentLanguageCode == LocalizedContentManager.LanguageCode.ru ? 64 : 0), gm.height);
+                    gm.pages[GameMenu.skillsTab] = new NewSkillsPage(gm.xPositionOnScreen, gm.yPositionOnScreen, gm.width + (LocalizedContentManager.CurrentLanguageCode == LocalizedContentManager.LanguageCode.ru ? 64 : 0), gm.height);
                 }
             }
         }
