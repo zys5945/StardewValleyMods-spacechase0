@@ -86,7 +86,8 @@ namespace ThreeHeartDancePartner
             NPC npc = dialog.speaker;
             if (!npc.datable.Value || npc.HasPartnerForDance)
                 return;
-            string rejectionText = Game1.content.Load<Dictionary<string, string>>($"Characters\\Dialogue\\{dialog.speaker.Name}")["FlowerDance_Decline"];
+
+            string rejectionText = new Dialogue(dialog.speaker, null, Game1.content.Load<Dictionary<string, string>>($"Characters\\Dialogue\\{dialog.speaker.Name}")["FlowerDance_Decline"]).getCurrentDialogue();
             if (dialog.getCurrentDialogue() != rejectionText)
                 return;
 
