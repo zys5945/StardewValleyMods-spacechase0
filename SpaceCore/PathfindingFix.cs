@@ -1,7 +1,7 @@
 // This code is from atravita with permission, thank you!
 // https://github.com/atravita-mods/StardewMods/blob/alpha/ExperimentalLagReduction/HarmonyPatches/Rescheduler.cs
 
-#if false
+#if true
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -419,9 +419,9 @@ internal static class Rescheduler
                     continue;
                 }
 
-                Gender PathfindingGenderConstrainedToCurrentSearch = GetTightestPathfindingGenderConstraint(Gender, node.PathfindingGenderConstraint);
+                Gender? PathfindingGenderConstrainedToCurrentSearch = GetTightestPathfindingGenderConstraint(Gender, node.PathfindingGenderConstraint);
 
-                if (PathfindingGenderConstrainedToCurrentSearch != Gender.Undefined && end is not null)
+                if (PathfindingGenderConstrainedToCurrentSearch != null && end is not null)
                 {
                     // found destination, return it.
                     if (end.Name == node.Name)
@@ -496,6 +496,9 @@ internal static class Rescheduler
                 }
             }
 
+            var v = _visited.Value;
+            var q = _queue.Value;
+            var d = _dedup.Value;
             if (ret is not null)
             {
                 _visited.Value.Clear();
@@ -529,7 +532,7 @@ internal static class Rescheduler
     }
 
     //[MethodImpl(TKConstants.Hot)]
-    private static void InsertRoute(string start, string end, Gender constraint, string[] route)
+    private static void InsertRoute(string start, string end, Gender? constraint, string[] route)
     {
         PathCache.AddOrUpdate(
             (start, end),
@@ -538,7 +541,7 @@ internal static class Rescheduler
     }
 
     //[MethodImpl(TKConstants.Hot)]
-    private static PathSet GetNewPathSet(Gender PathfindingGenderConstraint, string[] route)
+    private static PathSet GetNewPathSet(Gender? PathfindingGenderConstraint, string[] route)
         => PathfindingGenderConstraint switch
         {
             Gender.Male => new(route, null, null),
@@ -548,7 +551,7 @@ internal static class Rescheduler
         };
 
     //[MethodImpl(TKConstants.Hot)]
-    private static PathSet UpdatePathSetFor(Gender PathfindingGenderConstraint, PathSet prev, string[] route)
+    private static PathSet UpdatePathSetFor(Gender? PathfindingGenderConstraint, PathSet prev, string[] route)
     {
         switch (PathfindingGenderConstraint)
         {
@@ -663,8 +666,8 @@ internal static class Rescheduler
             return false;
         }
 
-        Gender startPathfindingGender = GetTightestPathfindingGenderConstraint((Gender)gender, GetPathfindingGenderConstraint(startingLocation));
-        if (startPathfindingGender == Gender.Undefined)
+        Gender? startPathfindingGender = GetTightestPathfindingGenderConstraint((Gender?)gender, GetPathfindingGenderConstraint(startingLocation));
+        if (startPathfindingGender == null)
         {
             SpaceCore.SpaceCore.Instance.Monitor.Log($"Requested path starting at {startingLocation}, which is not allowed due to Gender constraint {gender}.", LogLevel.Warn);
             return false;
@@ -676,8 +679,8 @@ internal static class Rescheduler
             SpaceCore.SpaceCore.Instance.Monitor.Log($"Requested path starting at {endingLocation}, which does not exist.", LogLevel.Warn);
             return false;
         }
-        Gender endPathfindingGender = GetTightestPathfindingGenderConstraint((Gender)gender, GetPathfindingGenderConstraint(actualEnd));
-        if (endPathfindingGender == Gender.Undefined)
+        Gender? endPathfindingGender = GetTightestPathfindingGenderConstraint((Gender?)gender, GetPathfindingGenderConstraint(actualEnd));
+        if (endPathfindingGender == null)
         {
             SpaceCore.SpaceCore.Instance.Monitor.Log($"Requested path starting at {endingLocation}, which is not allowed due to Gender constraint {gender}.", LogLevel.Warn);
             return false;
@@ -754,7 +757,7 @@ internal static class Rescheduler
     /// <param name="visited">Previous visited locations.</param>
     /// <param name="Gender">Current Gender constraint for the path.</param>
     /// <param name="queue">Queue to add to.</param>
-    private static void FindWarpsFrom(MacroNode node, GameLocation? location, HashSet<string> visited, Gender Gender, Queue<MacroNode> queue)
+    private static void FindWarpsFrom(MacroNode node, GameLocation? location, HashSet<string> visited, Gender? Gender, Queue<MacroNode> queue)
     {
         if (location is null)
         {
@@ -769,8 +772,8 @@ internal static class Rescheduler
             {
                 if (GetActualLocation(warp.TargetName) is string name && _dedup.Value.Add(name) && !visited.Contains(name))
                 {
-                    Gender PathfindingGenderConstraint = GetTightestPathfindingGenderConstraint(Gender, GetPathfindingGenderConstraint(name));
-                    if (PathfindingGenderConstraint != Gender.Undefined)
+                    Gender? PathfindingGenderConstraint = GetTightestPathfindingGenderConstraint(Gender, GetPathfindingGenderConstraint(name));
+                    if (PathfindingGenderConstraint != null)
                     {
                         queue.Enqueue(new(name, node, PathfindingGenderConstraint));
                     }
@@ -784,8 +787,8 @@ internal static class Rescheduler
             {
                 if (GetActualLocation(door) is string name && _dedup.Value.Add(name) && !visited.Contains(name))
                 {
-                    Gender pathfindingGenderConstraint = GetTightestPathfindingGenderConstraint(Gender, GetPathfindingGenderConstraint(name));
-                    if (pathfindingGenderConstraint != Gender.Undefined)
+                    Gender? pathfindingGenderConstraint = GetTightestPathfindingGenderConstraint(Gender, GetPathfindingGenderConstraint(name));
+                    if (pathfindingGenderConstraint != null)
                     {
                         queue.Enqueue(new(name, node, pathfindingGenderConstraint));
                     }
@@ -835,7 +838,7 @@ internal static class Rescheduler
     /// <param name="first">First Gender constraint.</param>
     /// <param name="second">Second Gender constraint.</param>
     /// <returns>Gender constraint, using Gender.Undefined for unsatisfiable.</returns>
-    private static Gender GetTightestPathfindingGenderConstraint(Gender first, Gender second)
+    private static Gender? GetTightestPathfindingGenderConstraint(Gender? first, Gender? second)
     {
         if (first == UnPathfindingGendered || first == second)
         {
@@ -845,7 +848,7 @@ internal static class Rescheduler
         {
             return first;
         }
-        return Gender.Undefined;
+        return null;
     }
 
     #endregion
@@ -855,10 +858,10 @@ internal static class Rescheduler
     {
         internal readonly string Name;
         internal readonly MacroNode? Prev;
-        internal readonly Gender PathfindingGenderConstraint;
+        internal readonly Gender? PathfindingGenderConstraint;
         internal readonly int Depth;
 
-        internal MacroNode(string name, MacroNode? prev, Gender PathfindingGenderConstraint)
+        internal MacroNode(string name, MacroNode? prev, Gender? PathfindingGenderConstraint)
         {
             this.Name = name;
             this.Prev = prev;
