@@ -17,6 +17,7 @@ Provided functionality for players:
     * You can set this menu to always show up when interacting with an NPC in the config, in case you want to (for example) prevent accidentally gifting an item to somebody.
 
 Provided functionality for content pack authors:
+* Fixes NPCs taking the longer path when there are circular routes. Note that the "length" of the path is determined by amount of warps, not by amount of tiles travelled, so if there are two paths to a location with the same amount of warps but one map is much larger, they might still take the larger map path.
 * New GameStateQuery queries:
     * Every custom skill registered through the C# API automatically registers a `PLAYER_<SKILLID_IN_CAPS>_LEVEL` query matching the vanilla ones (such as PLAYER_FARMING_LEVEL).
     * `NEARBY_CROPS radius cropId` - Only usable in CropExtensionData YieldOverrides PerItemCondition entries. Checks for fully grown crops of a particular type in a certain radius.
@@ -189,6 +190,7 @@ The rest of the features assume you understand C# and the game code a little bit
     * `List<string> GetExtraLevelUpInfo(int level)` - optional, extra text to show upon leveling
     * `string GetSkillPageHoverText(int level)` - optional, extra text to show when hovering on the skills page
     * `void DoLevelPerk(int level)` - optional, apply a some code immediately upon leveling
+    * `bool ShouldShowOnSkillsPage`
 * Custom crafting recipes, for when you want more flexibility (like using non-Object item types).
     * You subclass `CustomCraftingRecipe` and register it by doing `CustomCraftingRecipe.CraftingRecipes.Add( key, new MyCustomCraftingRecipeSubclass() )`.
         * If it is a cooking recipe, you use `CustomCraftingRecipe.CookingRecipes` instead.
