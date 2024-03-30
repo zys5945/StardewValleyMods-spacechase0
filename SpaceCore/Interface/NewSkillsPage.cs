@@ -62,8 +62,10 @@ namespace SpaceCore.Interface
             get => SpaceCore.Instance.Helper.ModRegistry.IsLoaded("spacechase0.LuckSkill") ? 6 : 5;
         }
 
+        private string[] VisibleSkills { get; }
+
         private int AllSkillCount
-            => this.GameSkillCount + Skills.GetSkillList().Length;
+            => this.GameSkillCount + VisibleSkills.Length;
 
         private int MaxSkillCountOnScreen
         {
@@ -89,7 +91,7 @@ namespace SpaceCore.Interface
             };
 
             // Professions
-            string[] skills = Skills.GetSkillList();
+            VisibleSkills = Skills.GetSkillList().Where(s => Skills.GetSkill(s).ShouldShowOnSkillsPage).ToArray();
             int drawX = 0;
             int addedX = LocalizedContentManager.CurrentLanguageCode == LocalizedContentManager.LanguageCode.ru ? this.xPositionOnScreen + width - 448 - 48 + 4 : this.xPositionOnScreen + IClickableMenu.borderWidth + IClickableMenu.spaceToClearTopBorder + 256 - 4;
             int drawY = this.yPositionOnScreen + IClickableMenu.spaceToClearTopBorder + IClickableMenu.borderWidth - 12;
@@ -154,7 +156,7 @@ namespace SpaceCore.Interface
                             myID = NewSkillsPage.SkillRegionStartId + (skillIndex * NewSkillsPage.SkillIdIncrement) + (professionIndex * NewSkillsPage.SkillProfessionIncrement)
                         };
                         textureComponent.leftNeighborID = textureComponent.myID - NewSkillsPage.SkillProfessionIncrement;
-                        textureComponent.downNeighborID = skillIndex == gameSkillCount - 1 && skills.Length == 0 ? -1 : textureComponent.myID + NewSkillsPage.SkillIdIncrement;
+                        textureComponent.downNeighborID = skillIndex == gameSkillCount - 1 && VisibleSkills.Length == 0 ? -1 : textureComponent.myID + NewSkillsPage.SkillIdIncrement;
                         this.skillBars.Add(textureComponent);
                         this.skillBarSkillIndexes[textureComponent.myID] = skillIndex;
                     }
@@ -166,11 +168,11 @@ namespace SpaceCore.Interface
             drawX = 0;
             for (int professionIndex = 1; professionIndex < 3; ++professionIndex)
             {
-                for (int skillIndex = 0; skillIndex < skills.Length; ++skillIndex)
+                for (int skillIndex = 0; skillIndex < VisibleSkills.Length; ++skillIndex)
                 {
                     int totalSkillIndex = gameSkillCount + skillIndex;
                     int professionLevel = professionIndex - 1 + (professionIndex * 4);
-                    Skills.Skill skill = Skills.GetSkill(skills[skillIndex]);
+                    Skills.Skill skill = Skills.GetSkill(VisibleSkills[skillIndex]);
                     Skills.Skill.Profession profession = Skills.GetProfessionFor(skill, professionLevel + 1);// Game1.player.getProfessionForSkill(0, num4 + 1);
                     bool drawRed = Game1.player.GetCustomBuffedSkillLevel(skill) > professionLevel;
                     List<string> professionLines = new List<string>();
@@ -198,7 +200,7 @@ namespace SpaceCore.Interface
                         };
                         textureComponent.leftNeighborID = textureComponent.myID - NewSkillsPage.SkillProfessionIncrement;
                         textureComponent.rightNeighborID = professionIndex == 2 ? -1 : textureComponent.myID + NewSkillsPage.SkillProfessionIncrement;
-                        textureComponent.downNeighborID = skillIndex == skills.Length - 1 ? -1 : textureComponent.myID + NewSkillsPage.SkillIdIncrement;
+                        textureComponent.downNeighborID = skillIndex == VisibleSkills.Length - 1 ? -1 : textureComponent.myID + NewSkillsPage.SkillIdIncrement;
                         skillBars.Add(textureComponent);
                         this.skillBarSkillIndexes[textureComponent.myID] = totalSkillIndex;
                     }
@@ -275,7 +277,7 @@ namespace SpaceCore.Interface
                 };
                 textureComponent.rightNeighborID = textureComponent.myID + NewSkillsPage.SkillProfessionIncrement;
                 textureComponent.leftNeighborID = leftSnapId;
-                textureComponent.downNeighborID = skillIndex == gameSkillCount - 1 && skills.Length == 0 ? -1 : textureComponent.myID + NewSkillsPage.SkillIdIncrement;
+                textureComponent.downNeighborID = skillIndex == gameSkillCount - 1 && VisibleSkills.Length == 0 ? -1 : textureComponent.myID + NewSkillsPage.SkillIdIncrement;
                 textureComponent.upNeighborID = skillIndex > 0 ? textureComponent.myID - NewSkillsPage.SkillProfessionIncrement : this.SkillTabRegionId;
 
                 this.skillAreas.Add(textureComponent);
@@ -283,9 +285,9 @@ namespace SpaceCore.Interface
             }
 
             // Icons for custom skills
-            for (int skillIndex = 0; skillIndex < skills.Length; ++skillIndex)
+            for (int skillIndex = 0; skillIndex < VisibleSkills.Length; ++skillIndex)
             {
-                Skills.Skill skill = Skills.GetSkill(skills[skillIndex]);
+                Skills.Skill skill = Skills.GetSkill(VisibleSkills[skillIndex]);
                 int actualSkillIndex = gameSkillCount + skillIndex;
                 string hoverText = "";
                 if (Game1.player.GetCustomBuffedSkillLevel(skill) > 0)
@@ -301,7 +303,7 @@ namespace SpaceCore.Interface
                 };
                 textureComponent.rightNeighborID = textureComponent.myID + NewSkillsPage.SkillProfessionIncrement;
                 textureComponent.leftNeighborID = leftSnapId;
-                textureComponent.downNeighborID = skillIndex == skills.Length - 1 ? -1 : textureComponent.myID + NewSkillsPage.SkillIdIncrement;
+                textureComponent.downNeighborID = skillIndex == VisibleSkills.Length - 1 ? -1 : textureComponent.myID + NewSkillsPage.SkillIdIncrement;
                 textureComponent.upNeighborID = textureComponent.myID - NewSkillsPage.SkillIdIncrement;
 
                 this.skillAreas.Add(textureComponent);
@@ -692,7 +694,7 @@ namespace SpaceCore.Interface
             }
 
             // Custom skills
-            foreach (string skillName in Skills.GetSkillList())
+            foreach (string skillName in VisibleSkills)
             {
                 if (indexWithLuckSkill < this.skillScrollOffset || indexWithLuckSkill > this.LastVisibleSkillIndex)
                 {
