@@ -1751,9 +1751,6 @@ namespace JsonAssets
                             if (this.FixId(this.OldObjectIds, this.ObjectIds, obj.preservedParentSheetIndex, this.VanillaObjectIds))
                                 obj.preservedParentSheetIndex.Value = -1;
                             */
-                            this.OldObjectIds.TryGetValue(obj.ItemId, out string newID);
-                            string corrID = newID == null ? "none" : newID.FixIdJA();
-                            Monitor.Log($"Object found with ID {obj.ItemId}, new ID {newID}, correct to {corrID}", LogLevel.Info);
                             if (this.OldObjectIds.ContainsKey(obj.ItemId))
                                 obj.ItemId = this.OldObjectIds[obj.ItemId].FixIdJA();
                         }
