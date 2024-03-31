@@ -41,7 +41,7 @@ namespace JsonAssets
         private static Regex NameFixer = new("[^a-zA-Z0-9_]", RegexOptions.Compiled);
         public static string FixIdJA(this string before)
         {
-            return NameFixer.Replace(before, "_");
+            return NameFixer.Replace(before.Trim(), "_");
         }
     }
 
