@@ -10,6 +10,9 @@ using SpaceShared;
 using StardewModdingAPI;
 using StardewValley;
 using StardewValley.GameData.Crafting;
+using StardewValley.Monsters;
+using StardewValley.Objects;
+using StardewValley.TerrainFeatures;
 
 namespace JsonAssets.Framework
 {
@@ -40,44 +43,115 @@ namespace JsonAssets.Framework
             this.ToLoad = new();
             foreach (var obj in Mod.instance.Objects)
             {
-                ToLoad.Add("JA/Object/" + obj.Name, obj.Texture);
-                if (obj.TextureColor != null)
-                    ToLoad.Add("JA/ObjectColor/" + obj.Name, obj.TextureColor);
+                try
+                {
+                    ToLoad.Add("JA/Object/" + obj.Name.FixIdJA(), obj.Texture);
+                    if (obj.TextureColor != null)
+                        ToLoad.Add("JA/ObjectColor/" + obj.Name.FixIdJA(), obj.TextureColor);
+                }
+                catch (Exception e)
+                {
+                    Log.Error($"Exception loading object texture for {obj.Name.FixIdJA()}: {e}");
+                }
             }
             foreach (var crop in Mod.instance.Crops)
             {
-                ToLoad.Add("JA/Crop/" + crop.Name, crop.Texture);
-                if (crop.GiantTexture != null)
-                    ToLoad.Add("JA/CropGiant/" + crop.Name, crop.GiantTexture);
+                try
+                {
+                    ToLoad.Add("JA/Crop/" + crop.Name, crop.Texture);
+                    if (crop.GiantTexture != null)
+                        ToLoad.Add("JA/CropGiant/" + crop.Name, crop.GiantTexture);
+                }
+                catch (Exception e)
+                {
+                    Log.Error($"Exception loading crop texture for {crop.Name}: {e}");
+                }
             }
             foreach (var ftree in Mod.instance.FruitTrees)
-                ToLoad.Add("JA/FruitTree/" + ftree.Name, ftree.Texture);
+            {
+                try
+                {
+                    ToLoad.Add("JA/FruitTree/" + ftree.Name, ftree.Texture);
+                }
+                catch (Exception e)
+                {
+                    Log.Error($"Exception loading fruit tree texture for {ftree.Name}: {e}");
+                }
+            }
             foreach (var big in Mod.instance.BigCraftables)
             {
-                ToLoad.Add("JA/BigCraftable0/" + big.Name, big.Texture);
-                for (int i = 0; i < big.ExtraTextures.Length; ++i)
-                    ToLoad.Add("JA/BigCraftable" + (i + 1) + "/" + big.Name, big.ExtraTextures[i]);
+                try
+                {
+                    ToLoad.Add("JA/BigCraftable0/" + big.Name.FixIdJA(), big.Texture);
+                    for (int i = 0; i < big.ExtraTextures.Length; ++i)
+                        ToLoad.Add("JA/BigCraftable" + (i + 1) + "/" + big.Name.FixIdJA(), big.ExtraTextures[i]);
+                }
+                catch (Exception e)
+                {
+                    Log.Error($"Exception loading big craftable texture for {big.Name.FixIdJA()}: {e}");
+                }
             }
             foreach (var hat in Mod.instance.Hats)
-                ToLoad.Add("JA/Hat/" + hat.Name, hat.Texture);
+            {
+                try
+                {
+                    ToLoad.Add("JA/Hat/" + hat.Name.FixIdJA(), hat.Texture);
+                }
+                catch (Exception e)
+                {
+                    Log.Error($"Exception loading hat texture for {hat.Name.FixIdJA()}: {e}");
+                }
+            }
             foreach (var weapon in Mod.instance.Weapons)
-                ToLoad.Add("JA/Weapon/" + weapon.Name, weapon.Texture);
+            {
+                try
+                {
+                    ToLoad.Add("JA/Weapon/" + weapon.Name.FixIdJA(), weapon.Texture);
+                }
+                catch (Exception e)
+                {
+                    Log.Error($"Exception loading weapon texture for {weapon.Name.FixIdJA()}: {e}");
+                }
+            }
             foreach ( var shirt in Mod.instance.Shirts )
             {
-                ToLoad.Add("JA/ShirtMale/" + shirt.Name, shirt.TextureMale);
-                if (shirt.TextureFemale != null)
-                    ToLoad.Add("JA/ShirtFemale/" + shirt.Name, shirt.TextureFemale);
-                if (shirt.TextureMaleColor != null)
-                    ToLoad.Add("JA/ShirtMaleColor/" + shirt.Name, shirt.TextureMaleColor);
-                if (shirt.TextureFemaleColor != null)
-                    ToLoad.Add("JA/ShirtFemaleColor/" + shirt.Name, shirt.TextureFemaleColor);
+                try
+                {
+                    ToLoad.Add("JA/ShirtMale/" + shirt.Name.FixIdJA(), shirt.TextureMale);
+                    if (shirt.TextureFemale != null)
+                        ToLoad.Add("JA/ShirtFemale/" + shirt.Name.FixIdJA(), shirt.TextureFemale);
+                    if (shirt.TextureMaleColor != null)
+                        ToLoad.Add("JA/ShirtMaleColor/" + shirt.Name.FixIdJA(), shirt.TextureMaleColor);
+                    if (shirt.TextureFemaleColor != null)
+                        ToLoad.Add("JA/ShirtFemaleColor/" + shirt.Name.FixIdJA(), shirt.TextureFemaleColor);
+                }
+                catch (Exception e)
+                {
+                    Log.Error($"Exception loading shirt texture for {shirt.Name.FixIdJA()}: {e}");
+                }
             }
             foreach ( var pants in Mod.instance.Pants )
-                ToLoad.Add("JA/Pants/" + pants.Name, pants.Texture);
+            {
+                try
+                {
+                    ToLoad.Add("JA/Pants/" + pants.Name.FixIdJA(), pants.Texture);
+                }
+                catch (Exception e)
+                {
+                    Log.Error($"Exception loading pants texture for {pants.Name.FixIdJA()}: {e}");
+                }
+            }
             foreach ( var boots in Mod.instance.Boots )
             {
-                ToLoad.Add("JA/Boots/" + boots.Name, boots.Texture);
-                ToLoad.Add("JA/BootsColor/" + boots.Name, boots.TextureColor);
+                try
+                {
+                    ToLoad.Add("JA/Boots/" + boots.Name.FixIdJA(), boots.Texture);
+                    ToLoad.Add("JA/BootsColor/" + boots.Name.FixIdJA(), boots.TextureColor);
+                }
+                catch (Exception e)
+                {
+                    Log.Error($"Exception loading boots texture for {boots.Name.FixIdJA()}: {e}");
+                }
             }
             // TODO custom fence when they implement them in vanilla
 

@@ -19,6 +19,7 @@ using SpaceShared.APIs;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
+using StardewValley.BellsAndWhistles;
 using StardewValley.Buildings;
 using StardewValley.Characters;
 using StardewValley.Locations;
@@ -41,7 +42,7 @@ namespace JsonAssets
         private static Regex NameFixer = new("[^a-zA-Z0-9_]", RegexOptions.Compiled);
         public static string FixIdJA(this string before)
         {
-            return NameFixer.Replace(before, "_");
+            return NameFixer.Replace(before.Trim(), "_");
         }
     }
 
@@ -377,6 +378,15 @@ namespace JsonAssets
             else
                 this.DupCrops[crop.Name] = source;
 
+            // check for duplicates
+            if (this.DupObjects.TryGetValue(crop.Seed.Name.FixIdJA(), out IManifest prevManifest2))
+            {
+                Log.Error($"Duplicate object: {crop.Seed.Name.FixIdJA()} just added by {source.Name}, already added by {prevManifest2.Name}!");
+                return;
+            }
+            else
+                this.DupObjects[crop.Seed.Name.FixIdJA()] = source;
+
             // save seed data
             this.Objects.Add(crop.Seed);
 
@@ -465,6 +475,15 @@ namespace JsonAssets
             }
             else
                 this.DupFruitTrees[tree.Name] = source;
+
+            // check for duplicates
+            if (this.DupObjects.TryGetValue(tree.Sapling.Name.FixIdJA(), out IManifest prevManifest2))
+            {
+                Log.Error($"Duplicate object: {tree.Sapling.Name.FixIdJA()} just added by {source.Name}, already added by {prevManifest2.Name}!");
+                return;
+            }
+            else
+                this.DupObjects[tree.Sapling.Name.FixIdJA()] = source;
 
             if (!this.FruitTreesByContentPack.TryGetValue(source, out List<string> addedNames))
                 addedNames = this.FruitTreesByContentPack[source] = new List<string>();
@@ -1460,7 +1479,7 @@ namespace JsonAssets
                 var objs = LoadDictionary<string, int>("ids-objects.json");
                 foreach (string key in objs.Keys)
                 {
-                    if (!DupObjects.ContainsKey(key))
+                    if (!DupObjects.ContainsKey(key.FixIdJA()))
                         OldObjectIds.Remove(objs[key].ToString());
                 }
                 var crops = LoadDictionary<string, int>("ids-crops.json");
@@ -1478,31 +1497,31 @@ namespace JsonAssets
                 var bigs = LoadDictionary<string, int>("ids-big-craftables.json");
                 foreach (string key in bigs.Keys)
                 {
-                    if (!DupBigCraftables.ContainsKey(key))
+                    if (!DupBigCraftables.ContainsKey(key.FixIdJA()))
                         OldBigCraftableIds.Remove(bigs[key].ToString());
                 }
                 var hats = LoadDictionary<string, int>("ids-hats.json");
                 foreach (string key in hats.Keys)
                 {
-                    if (!DupHats.ContainsKey(key))
+                    if (!DupHats.ContainsKey(key.FixIdJA()))
                         OldHatIds.Remove(hats[key].ToString());
                 }
                 var weapons = LoadDictionary<string, int>("ids-weapons.json");
                 foreach (string key in weapons.Keys)
                 {
-                    if (!DupWeapons.ContainsKey(key))
+                    if (!DupWeapons.ContainsKey(key.FixIdJA()))
                         OldWeaponIds.Remove(weapons[key].ToString());
                 }
                 var clothing = LoadDictionary<string, int>("ids-clothing.json");
                 foreach (string key in clothing.Keys)
                 {
-                    if (!DupShirts.ContainsKey(key) && !DupPants.ContainsKey(key))
+                    if (!DupShirts.ContainsKey(key.FixIdJA()) && !DupPants.ContainsKey(key.FixIdJA()))
                         OldClothingIds.Remove(clothing[key].ToString());
                 }
                 var boots = LoadDictionary<string, int>("ids-boots.json");
                 foreach (string key in boots.Keys)
                 {
-                    if (!DupBoots.ContainsKey(key))
+                    if (!DupBoots.ContainsKey(key.FixIdJA()))
                         OldBootsIds.Remove(boots[key].ToString());
                 }
             }
