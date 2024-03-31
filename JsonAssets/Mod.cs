@@ -1951,7 +1951,7 @@ namespace JsonAssets
                 if (this.OldObjectIds.ContainsKey(entry))
                 {
                     toRemove.Add(entry);
-                    toAdd.Add(this.OldObjectIds[entry].FixIdJA(), dict[entry]);
+                    toAdd.TryAdd(this.OldObjectIds[entry].FixIdJA(), dict[entry]);
                 }
             }
             foreach (string entry in toRemove)
