@@ -1460,7 +1460,7 @@ namespace JsonAssets
                 var objs = LoadDictionary<string, int>("ids-objects.json");
                 foreach (string key in objs.Keys)
                 {
-                    if (!DupObjects.ContainsKey(key))
+                    if (!DupObjects.ContainsKey(key.FixIdJA()))
                         OldObjectIds.Remove(objs[key].ToString());
                 }
                 var crops = LoadDictionary<string, int>("ids-crops.json");
@@ -1478,31 +1478,31 @@ namespace JsonAssets
                 var bigs = LoadDictionary<string, int>("ids-big-craftables.json");
                 foreach (string key in bigs.Keys)
                 {
-                    if (!DupBigCraftables.ContainsKey(key))
+                    if (!DupBigCraftables.ContainsKey(key.FixIdJA()))
                         OldBigCraftableIds.Remove(bigs[key].ToString());
                 }
                 var hats = LoadDictionary<string, int>("ids-hats.json");
                 foreach (string key in hats.Keys)
                 {
-                    if (!DupHats.ContainsKey(key))
+                    if (!DupHats.ContainsKey(key.FixIdJA()))
                         OldHatIds.Remove(hats[key].ToString());
                 }
                 var weapons = LoadDictionary<string, int>("ids-weapons.json");
                 foreach (string key in weapons.Keys)
                 {
-                    if (!DupWeapons.ContainsKey(key))
+                    if (!DupWeapons.ContainsKey(key.FixIdJA()))
                         OldWeaponIds.Remove(weapons[key].ToString());
                 }
                 var clothing = LoadDictionary<string, int>("ids-clothing.json");
                 foreach (string key in clothing.Keys)
                 {
-                    if (!DupShirts.ContainsKey(key) && !DupPants.ContainsKey(key))
+                    if (!DupShirts.ContainsKey(key.FixIdJA()) && !DupPants.ContainsKey(key.FixIdJA()))
                         OldClothingIds.Remove(clothing[key].ToString());
                 }
                 var boots = LoadDictionary<string, int>("ids-boots.json");
                 foreach (string key in boots.Keys)
                 {
-                    if (!DupBoots.ContainsKey(key))
+                    if (!DupBoots.ContainsKey(key.FixIdJA()))
                         OldBootsIds.Remove(boots[key].ToString());
                 }
             }
@@ -1751,6 +1751,9 @@ namespace JsonAssets
                             if (this.FixId(this.OldObjectIds, this.ObjectIds, obj.preservedParentSheetIndex, this.VanillaObjectIds))
                                 obj.preservedParentSheetIndex.Value = -1;
                             */
+                            this.OldObjectIds.TryGetValue(obj.ItemId, out string newID);
+                            string corrID = newID == null ? "none" : newID.FixIdJA();
+                            Monitor.Log($"Object found with ID {obj.ItemId}, new ID {newID}, correct to {corrID}", LogLevel.Info);
                             if (this.OldObjectIds.ContainsKey(obj.ItemId))
                                 obj.ItemId = this.OldObjectIds[obj.ItemId].FixIdJA();
                         }
