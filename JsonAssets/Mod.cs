@@ -1620,6 +1620,8 @@ namespace JsonAssets
             this.FixIdDict(Game1.player.recipesCooked);
             this.FixIdDict2(Game1.player.archaeologyFound);
             this.FixIdDict2(Game1.player.fishCaught);
+            this.FixRecipeDict(Game1.player.craftingRecipes);
+            this.FixRecipeDict(Game1.player.cookingRecipes);
 
             // Fix this if anyone complains it isn't working
             /*
@@ -1899,14 +1901,14 @@ namespace JsonAssets
                     {
                         try
                         {
-                            if (this.OldFruitTreeIds.ContainsKey(ftree.treeId.Value))
+                            if (ftree.treeId.Value != null && this.OldFruitTreeIds.ContainsKey(ftree.treeId.Value))
                             {
                                 ftree.treeId.Value = this.OldFruitTreeIds[ftree.treeId.Value].FixIdJA();
                             }
                         }
-                        catch
+                        catch (Exception e)
                         {
-
+                            Log.Error($"Error migrating fruit tree: {e}");
                         }
                     }
                     break;
@@ -1987,6 +1989,40 @@ namespace JsonAssets
                 dict.Remove(entry);
             foreach (var entry in toAdd)
                 dict.Add(entry.Key, entry.Value);
+        }
+
+        private void FixRecipeDict(NetStringDictionary<int, NetInt> dict, bool removeUnshippable = false)
+        {
+            var toRemove = new List<string>();
+            var toAdd = new Dictionary<string, int>();
+            foreach (string entry in dict.Keys)
+            {
+                if (this.OldObjectIds.ContainsValue(entry))
+                {
+                    toRemove.Add(entry);
+                    toAdd.TryAdd(entry.FixIdJA(), dict[entry]);
+                }
+                else if (this.OldBigCraftableIds.ContainsValue(entry))
+                {
+                    toRemove.Add(entry);
+                    toAdd.TryAdd(entry.FixIdJA(), dict[entry]);
+                }
+            }
+            foreach (string entry in toRemove)
+                dict.Remove(entry);
+            foreach (var entry in toAdd)
+            {
+                if (dict.ContainsKey(entry.Key))
+                {
+                    Log.Error("Dict already has value for " + entry.Key + "!");
+                    foreach (var obj in this.Objects)
+                    {
+                        if (obj.Name.FixIdJA() == entry.Key)
+                            Log.Error("\tobj = " + obj.Name);
+                    }
+                }
+                dict.Add(entry.Key, entry.Value);
+            }
         }
     }
 }
