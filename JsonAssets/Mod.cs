@@ -19,6 +19,7 @@ using SpaceShared.APIs;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
+using StardewValley.BellsAndWhistles;
 using StardewValley.Buildings;
 using StardewValley.Characters;
 using StardewValley.Locations;
@@ -377,6 +378,15 @@ namespace JsonAssets
             else
                 this.DupCrops[crop.Name] = source;
 
+            // check for duplicates
+            if (this.DupObjects.TryGetValue(crop.Seed.Name.FixIdJA(), out IManifest prevManifest2))
+            {
+                Log.Error($"Duplicate object: {crop.Seed.Name.FixIdJA()} just added by {source.Name}, already added by {prevManifest2.Name}!");
+                return;
+            }
+            else
+                this.DupObjects[crop.Seed.Name.FixIdJA()] = source;
+
             // save seed data
             this.Objects.Add(crop.Seed);
 
@@ -465,6 +475,15 @@ namespace JsonAssets
             }
             else
                 this.DupFruitTrees[tree.Name] = source;
+
+            // check for duplicates
+            if (this.DupObjects.TryGetValue(tree.Sapling.Name.FixIdJA(), out IManifest prevManifest2))
+            {
+                Log.Error($"Duplicate object: {tree.Sapling.Name.FixIdJA()} just added by {source.Name}, already added by {prevManifest2.Name}!");
+                return;
+            }
+            else
+                this.DupObjects[tree.Sapling.Name.FixIdJA()] = source;
 
             if (!this.FruitTreesByContentPack.TryGetValue(source, out List<string> addedNames))
                 addedNames = this.FruitTreesByContentPack[source] = new List<string>();
