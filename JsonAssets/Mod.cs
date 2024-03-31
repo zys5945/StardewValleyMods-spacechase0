@@ -308,7 +308,7 @@ namespace JsonAssets
             // validate
             if (!this.AssertHasName(crop, "crop", source, translations))
                 return;
-            if (!this.AssertHasName(crop.Seed, "crop seed", source, translations, discriminator: $"crop: {crop.Name}", fieldName: nameof(crop.SeedName)))
+            if (!this.AssertHasName(crop.Seed, "crop seed", source, translations, discriminator: $"crop: {crop.Name.FixIdJA()}", fieldName: nameof(crop.SeedName)))
                 return;
 
             // save crop data
@@ -370,13 +370,13 @@ namespace JsonAssets
             }
 
             // check for duplicates
-            if (this.DupCrops.TryGetValue(crop.Name, out IManifest prevManifest))
+            if (this.DupCrops.TryGetValue(crop.Name.FixIdJA(), out IManifest prevManifest))
             {
-                Log.Error($"Duplicate crop: {crop.Name} just added by {source.Name}, already added by {prevManifest.Name}!");
+                Log.Error($"Duplicate crop: {crop.Name.FixIdJA()} just added by {source.Name}, already added by {prevManifest.Name}!");
                 return;
             }
             else
-                this.DupCrops[crop.Name] = source;
+                this.DupCrops[crop.Name.FixIdJA()] = source;
 
             // check for duplicates
             if (this.DupObjects.TryGetValue(crop.Seed.Name.FixIdJA(), out IManifest prevManifest2))
@@ -438,7 +438,7 @@ namespace JsonAssets
             // validate
             if (!this.AssertHasName(tree, "fruit tree", source, translations))
                 return;
-            if (!this.AssertHasName(tree.Sapling, "fruit tree sapling", source, translations, discriminator: $"fruit tree: {tree.Name}", fieldName: nameof(tree.SaplingName)))
+            if (!this.AssertHasName(tree.Sapling, "fruit tree sapling", source, translations, discriminator: $"fruit tree: {tree.Name.FixIdJA()}", fieldName: nameof(tree.SaplingName)))
                 return;
 
             // save data
@@ -468,13 +468,13 @@ namespace JsonAssets
             }
 
             // check for duplicates
-            if (this.DupFruitTrees.TryGetValue(tree.Name, out IManifest prevManifest))
+            if (this.DupFruitTrees.TryGetValue(tree.Name.FixIdJA(), out IManifest prevManifest))
             {
-                Log.Error($"Duplicate fruit tree: {tree.Name} just added by {source.Name}, already added by {prevManifest.Name}!");
+                Log.Error($"Duplicate fruit tree: {tree.Name.FixIdJA()} just added by {source.Name}, already added by {prevManifest.Name}!");
                 return;
             }
             else
-                this.DupFruitTrees[tree.Name] = source;
+                this.DupFruitTrees[tree.Name.FixIdJA()] = source;
 
             // check for duplicates
             if (this.DupObjects.TryGetValue(tree.Sapling.Name.FixIdJA(), out IManifest prevManifest2))
@@ -1485,13 +1485,13 @@ namespace JsonAssets
                 var crops = LoadDictionary<string, int>("ids-crops.json");
                 foreach (string key in crops.Keys)
                 {
-                    if (!DupCrops.ContainsKey(key))
+                    if (!DupCrops.ContainsKey(key.FixIdJA()))
                         OldCropIds.Remove(crops[key].ToString());
                 }
                 var ftrees = LoadDictionary<string, int>("ids-fruittrees.json");
                 foreach (string key in ftrees.Keys)
                 {
-                    if (!DupFruitTrees.ContainsKey(key))
+                    if (!DupFruitTrees.ContainsKey(key.FixIdJA()))
                         OldFruitTreeIds.Remove(ftrees[key].ToString());
                 }
                 var bigs = LoadDictionary<string, int>("ids-big-craftables.json");
@@ -1897,9 +1897,16 @@ namespace JsonAssets
 
                 case FruitTree ftree:
                     {
-                        if (this.OldFruitTreeIds.ContainsKey(ftree.treeId.Value))
+                        try
                         {
-                            ftree.treeId.Value = this.OldFruitTreeIds[ftree.treeId.Value].FixIdJA();
+                            if (this.OldFruitTreeIds.ContainsKey(ftree.treeId.Value))
+                            {
+                                ftree.treeId.Value = this.OldFruitTreeIds[ftree.treeId.Value].FixIdJA();
+                            }
+                        }
+                        catch
+                        {
+
                         }
                     }
                     break;
