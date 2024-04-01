@@ -73,6 +73,7 @@ namespace JsonAssets
         private readonly Dictionary<string, IManifest> DupShirts = new();
         private readonly Dictionary<string, IManifest> DupPants = new();
         private readonly Dictionary<string, IManifest> DupBoots = new();
+        private Dictionary<string, string> FruitTreeSaplings = new();
         private readonly Regex SeasonLimiter = new("(z(?: spring| summer| fall| winter){2,4})", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         /// <summary>The mod entry point, called after the mod is first loaded.</summary>
@@ -444,6 +445,7 @@ namespace JsonAssets
             // save data
             this.FruitTrees.Add(tree);
             this.Objects.Add(tree.Sapling);
+            this.FruitTreeSaplings.Add(tree.Name.FixIdJA(), tree.SaplingName.FixIdJA());
 
             // add sapling to shops
             if (tree.Sapling.CanPurchase)
@@ -1901,10 +1903,33 @@ namespace JsonAssets
                     {
                         try
                         {
-                            if (ftree.treeId.Value != null && this.OldFruitTreeIds.ContainsKey(ftree.treeId.Value))
+                            // Migrate the fruit trees from old to new data types if they're one of ours
+                            if (ftree.obsolete_treeType != null && this.OldFruitTreeIds.ContainsKey(ftree.obsolete_treeType))
                             {
-                                ftree.treeId.Value = this.OldFruitTreeIds[ftree.treeId.Value].FixIdJA();
+                                ftree.treeId.Value = ftree.obsolete_treeType;
+                                ftree.obsolete_treeType = null;
                             }
+                            // Now migrate them from int to string IDs
+                            Log.Info($"Fruit tree ID: {ftree.treeId.Value}");
+                            if (ftree.treeId.Value != null)
+                            {
+                                // Look up the proper tree name
+                                this.OldFruitTreeIds.TryGetValue(ftree.treeId.Value, out string val);
+                                Log.Info($"Best guess: {val}");
+                                if (val != null)
+                                {
+                                    // Translate the proper tree name to sapling name and set as tree ID
+                                    ftree.treeId.Value = FruitTreeSaplings[val.FixIdJA()];
+                                    // Fix the fruits on the tree
+                                    if (ftree.obsolete_fruitsOnTree != null)
+                                    {
+                                        for (int i = 0; i < ftree.obsolete_fruitsOnTree; i++)
+                                            ftree.TryAddFruit();
+                                        ftree.obsolete_fruitsOnTree = null;
+                                    }
+                                }
+                            }
+                            
                         }
                         catch (Exception e)
                         {

@@ -269,7 +269,7 @@ namespace JsonAssets.Framework
                         {
                             new StardewValley.GameData.FruitTrees.FruitTreeFruitData()
                             {
-                                ItemId = "(O)" + fruitTree.Product.ToString(),
+                                ItemId = "(O)" + fruitTree.Product.ToString().FixIdJA(),
                             }
                         } ),
                         Texture = "JA/FruitTree/" + fruitTree.Name.FixIdJA(),
