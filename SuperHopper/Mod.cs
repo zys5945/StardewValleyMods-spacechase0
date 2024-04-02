@@ -71,7 +71,7 @@ namespace SuperHopper
                     chest.heldObject.Value = null;
                     chest.modData.Remove(this.ModDataFlag);
 
-                    Game1.player.addItemToInventory(new SObject(SObject.iridiumBar, 1));
+                    Game1.player.addItemToInventory(new SObject(SObject.iridiumBarID, 1));
 
                     Game1.playSound("shiny4");
                 }
